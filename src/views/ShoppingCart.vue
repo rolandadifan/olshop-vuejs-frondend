@@ -34,38 +34,23 @@
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
+                      <tr v-for="keranjang in keranjangUser" :key="keranjang.id">
                         <td class="cart-pic first-row">
-                          <img src="img/cart-page/product-1.jpg" />
+                          <img :src="keranjang.photo" />
                         </td>
                         <td class="cart-title first-row text-center">
-                          <h5>Pure Pineapple</h5>
+                          <h5>{{keranjang.name}}</h5>
                         </td>
-                        <td class="p-price first-row">$60.00</td>
+                        <td class="p-price first-row">${{keranjang.price}}</td>
                         <td class="delete-item">
-                          <a href="#"
+                          <a href="#/cart" @click="removeItem(keranjangUser.index)"
                             ><i class="material-icons">
                               close
                             </i></a
                           >
                         </td>
                       </tr>
-                      <tr>
-                        <td class="cart-pic first-row">
-                          <img src="img/cart-page/product-1.jpg" />
-                        </td>
-                        <td class="cart-title first-row text-center">
-                          <h5>Pure Pineapple</h5>
-                        </td>
-                        <td class="p-price first-row">$60.00</td>
-                        <td class="delete-item">
-                          <a href="#"
-                            ><i class="material-icons">
-                              close
-                            </i></a
-                          >
-                        </td>
-                      </tr>
+                      
                     </tbody>
                   </table>
                 </div>
@@ -84,6 +69,7 @@
                         id="namaLengkap"
                         aria-describedby="namaHelp"
                         placeholder="Masukan Nama"
+                        v-model="customerInfo.name"
                       />
                     </div>
                     <div class="form-group">
@@ -94,6 +80,7 @@
                         id="emailAddress"
                         aria-describedby="emailHelp"
                         placeholder="Masukan Email"
+                        v-model="customerInfo.email"
                       />
                     </div>
                     <div class="form-group">
@@ -104,6 +91,7 @@
                         id="noHP"
                         aria-describedby="noHPHelp"
                         placeholder="Masukan No. HP"
+                        v-model="customerInfo.number"
                       />
                     </div>
                     <div class="form-group">
@@ -112,6 +100,7 @@
                         class="form-control"
                         id="alamatLengkap"
                         rows="3"
+                        v-model="customerInfo.address"
                       ></textarea>
                     </div>
                   </form>
@@ -127,10 +116,10 @@
                     <li class="subtotal">
                       ID Transaction <span>#SH12000</span>
                     </li>
-                    <li class="subtotal mt-3">Subtotal <span>$240.00</span></li>
-                    <li class="subtotal mt-3">Pajak <span>10%</span></li>
+                    <li class="subtotal mt-3">Subtotal <span>${{totalHarga}}</span></li>
+                    <li class="subtotal mt-3">Pajak <span>10% ${{ditambahPajak}}</span></li>
                     <li class="subtotal mt-3">
-                      Total Biaya <span>$440.00</span>
+                      Total Biaya <span>${{totalBiaya}}</span>
                     </li>
                     <li class="subtotal mt-3">
                       Bank Transfer <span>Mandiri</span>
@@ -142,11 +131,11 @@
                       Nama Penerima <span>Shayna</span>
                     </li>
                   </ul>
-                  <router-link to="/success"
-                    ><a href="#" class="proceed-btn"
-                      >I ALREADY PAID</a
-                    ></router-link
-                  >
+                  <!-- <router-link to="/success"
+                    >-->
+                    <a @click="checkout()" href="#" class="proceed-btn" 
+                      >I ALREADY PAID</a>
+                    <!-- </router-li> -->
                 </div>
               </div>
             </div>
@@ -163,12 +152,78 @@
 <script>
 import Header from "@/components/Header.vue";
 import Footer from "@/components/Footer.vue";
+import axios from "axios";
 
 export default {
   name: "ShoppingCart",
-  components: {
-    Header,
-    Footer,
+    components: {
+      Header,
+      Footer,
+    },
+  data(){
+    return {
+      keranjangUser: [],
+      customerInfo: {
+        name: '',
+        email: '',
+        number: '',
+        address: ''
+      }
+    };
   },
+  methods: {
+      removeItem(index){
+          this.keranjangUser.splice(index, 1);
+          const parsed = JSON.stringify(this.keranjangUser);
+      localStorage.setItem('keranjangUser', parsed);
+      },
+      checkout(){
+        let productIds = this.keranjangUser.map(function(product){
+          return product.id
+        });
+        let checkoutData = {
+          'name': this.customerInfo.name,
+          'email': this.customerInfo.email,
+          'number': this.customerInfo.number,
+          'address': this.customerInfo.address,
+          "transaction_total": this.totalBiaya,
+          "transaction_status": "PENDING",
+          "transaction_details": productIds
+        };
+        axios
+        .post("http://127.0.0.1:8000/api/checkout",checkoutData)
+        .then(()=> this.$router.push('Success'))
+        .catch(err => console.log(err));
+      }
+  },
+  mounted(){
+      if (localStorage.getItem("keranjangUser")){
+      try {
+        this.keranjangUser = JSON.parse(localStorage.getItem("keranjangUser"));
+      } catch(e) {
+        localStorage.removeItem("keranjangUser");
+      }
+    }
+  },
+  computed: {
+      totalHarga(){
+          return this.keranjangUser.reduce(function(items, data){
+              return items + data.price;
+          }, 0);
+      },
+      ditambahPajak(){
+        return (this.totalHarga * 10/100);
+      },
+      totalBiaya(){
+        return (this.totalHarga + this.ditambahPajak);
+      }
+  }
 };
 </script>
+
+<style  scoped>
+  .cart-pic img{
+    width: 100px;
+    height: 100px;
+  }
+</style>

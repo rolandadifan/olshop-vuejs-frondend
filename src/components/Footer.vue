@@ -7,14 +7,12 @@
           <div class="col-lg-5">
             <div class="footer-left text-left">
               <div class="footer-logo">
-                <a href="#"
-                  ><img src="img/logo_website_shayna_white.png" alt=""
-                /></a>
+                <a href="#" style="color: red; font-size:25px">OLSHOP.ID</a>
               </div>
               <ul>
-                <li>Address: Setra Duta, Bandung</li>
+                <li>Address: Mangga dua, Jakarta</li>
                 <li>Phone: +628 22081996</li>
-                <li>Email: hello.shayna@gmail.com</li>
+                <li>Email: olshop@gmail.com</li>
               </ul>
               <div class="footer-social">
                 <a href="#"><i class="fa fa-facebook"></i></a>
@@ -53,7 +51,7 @@
           <div class="row">
             <div class="col-lg-12">
               <div class="copyright-text text-center">
-                Copyright &copy; 2020 All rights reserved | Shayna
+                Copyright &copy; 2020 All rights reserved | olshopcorp
               </div>
             </div>
           </div>
